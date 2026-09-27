@@ -13,8 +13,8 @@
 <link rel="manifest" href="manifest.json">
 <title>Habits</title>
 <style>
-:root{--bg:#f6f5f1;--card:#fff;--ink:#1d1f1c;--muted:#6b6f68;--line:#e4e2dc;--accent:#2f7d5b;--accent-ink:#fff;--soft:#d8ebe1;--half:#9cc9b2;--warn:#b5562b;--cell:#e8e6df}
-@media (prefers-color-scheme:dark){:root{--bg:#161816;--card:#212421;--ink:#ecede9;--muted:#9a9e96;--line:#323631;--accent:#5fbf8f;--accent-ink:#0f1a14;--soft:#22392d;--half:#3d7a5a;--warn:#e08a5f;--cell:#2b2f2a}}
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d1f1c;--muted:#6b6f68;--line:#e4e2dc;--accent:#2f7d5b;--accent-ink:#fff;--soft:#e3f0e9;--warn:#b5562b;--cell:#e8e6df}
+@media (prefers-color-scheme:dark){:root{--bg:#161816;--card:#212421;--ink:#ecede9;--muted:#9a9e96;--line:#323631;--accent:#5fbf8f;--accent-ink:#0f1a14;--soft:#1f3328;--warn:#e08a5f;--cell:#2b2f2a}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,system-ui,sans-serif}
 body{padding:env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom));min-height:100vh}
@@ -22,9 +22,11 @@ main{max-width:560px;margin:0 auto;padding:8px 16px}
 h1{font-size:26px;margin:0}
 h2{font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:28px 0 10px}
 button{font:inherit;color:inherit;cursor:pointer}
-input,select{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+input,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px;width:100%}
+textarea{resize:vertical;min-height:110px;line-height:1.45}
+input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
 label{display:block;font-size:14px;color:var(--muted);margin:0 0 12px}
-label input,label select{margin-top:4px}
+label input{margin-top:4px}
 .sub{color:var(--muted);margin:2px 0 0;font-size:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px}
 .primary{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:12px 18px;font-weight:600}
@@ -34,44 +36,47 @@ label input,label select{margin-top:4px}
 .icon:disabled{opacity:.3}
 header.day{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 18px;text-align:center}
 .summary{color:var(--muted);margin:0 0 12px;font-size:14px}
-.habit{display:flex;width:100%;text-align:left;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px}
-.habit .name{flex:1;font-weight:500}
-.streak{font-size:14px;color:var(--muted);white-space:nowrap}
+
+.act{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.act.open{border-color:var(--accent)}
+.act .head{display:flex;width:100%;align-items:center;gap:14px;text-align:left;background:none;border:0;padding:14px 16px}
+.act .name{flex:1;min-width:0;font-weight:600}
+.act .name small{display:block;font-weight:400;font-size:14px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act.done .name small{color:var(--accent)}
 .tick{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;color:var(--accent-ink)}
-.habit.done .tick{background:var(--accent);border-color:var(--accent)}
-.habit.amount{display:block}
-.habit .row{display:flex;align-items:center;gap:12px}
-.habit .row+.row{margin-top:10px}
-.step{width:48px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:22px}
-.qty{flex:1;height:44px;border:0;background:none;font-size:20px;font-weight:600}
-.qty small{font-size:14px;font-weight:400;color:var(--muted)}
-.bar{height:6px;border-radius:3px;background:var(--cell);margin-top:10px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.act.done .tick{background:var(--accent);border-color:var(--accent)}
+.chev{color:var(--muted);font-size:20px}
+.act .body{padding:0 16px 14px}
+.field{display:flex;align-items:center;gap:10px}
+.field input{font-size:22px;font-weight:600}
+.field span{color:var(--muted);white-space:nowrap}
+.err{color:var(--warn);font-size:14px;margin:8px 0 0;min-height:0}
+.err:empty{display:none}
+.row{display:flex;align-items:center;gap:10px;margin-top:12px}
+.row .grow{flex:1}
+.confirm{width:56px;height:56px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);font-size:26px;font-weight:700}
+
 .empty{text-align:center;padding:40px 0;color:var(--muted)}
 .syncline{text-align:center;font-size:13px;color:var(--muted);margin-top:18px}
 .syncline.err{color:var(--warn)}
 .grid{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px;margin-top:12px}
 .grid i{aspect-ratio:1;border-radius:3px;background:var(--cell)}
 .grid i.full{background:var(--accent)}
-.grid i.half{background:var(--half)}
 .grid i.future{background:none}
-.stats{display:flex;gap:18px;font-size:14px;color:var(--muted);margin-top:4px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted);margin-top:4px}
 .stats b{color:var(--ink);font-size:16px}
-.hrow{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
-.hrow:last-child{border-bottom:0}
-.hrow .name{flex:1;min-width:0}
-.hrow .meta{font-size:13px;color:var(--muted)}
-.hrow button{background:none;border:1px solid var(--line);border-radius:10px;min-width:40px;height:36px;padding:0 10px}
+.notes{margin:12px 0 0;padding:0;list-style:none}
+.notes li{padding:8px 0;border-top:1px solid var(--line);font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.notes time{display:block;font-size:13px;color:var(--muted)}
+.alist{margin:0;padding:0;list-style:none}
+.alist li{padding:8px 0;border-bottom:1px solid var(--line)}
+.alist li:last-child{border-bottom:0}
+.alist small{display:block;color:var(--muted);font-size:13px}
 .btns{display:flex;gap:10px;flex-wrap:wrap}
 .note{font-size:13px;color:var(--muted);margin:8px 0 0}
 nav.tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:5}
-nav.tabs button{flex:1;padding:12px 0 12px;background:none;border:0;color:var(--muted);font-size:14px}
+nav.tabs button{flex:1;padding:12px 0;background:none;border:0;color:var(--muted);font-size:14px}
 nav.tabs button.on{color:var(--accent);font-weight:600}
-dialog{border:0;border-radius:18px;padding:20px;width:min(92vw,420px);background:var(--card);color:var(--ink)}
-dialog::backdrop{background:rgba(0,0,0,.4)}
-dialog h3{margin:0 0 16px}
-.dbtns{display:flex;align-items:center;gap:10px;margin-top:8px}
-.dbtns span{flex:1}
 </style>
 </head>
 <body>
@@ -81,44 +86,32 @@ dialog h3{margin:0 0 16px}
   <button data-act="tab" data-tab="history">History</button>
   <button data-act="tab" data-tab="settings">Settings</button>
 </nav>
-
-<dialog id="dlg">
-  <form method="dialog" id="hform">
-    <h3 id="dtitle">Habit</h3>
-    <label>Name<input name="name" required maxlength="60" placeholder="e.g. Read, Drink water"></label>
-    <label>Type<select name="type"><option value="check">Yes / no (tick it off)</option><option value="amount">Amount (count something)</option></select></label>
-    <div id="amt">
-      <label>Unit<input name="unit" placeholder="glasses, min, pages"></label>
-      <label>Daily target (optional)<input name="target" type="number" inputmode="decimal" min="0" step="any"></label>
-      <label>Each + / − adds<input name="step" type="number" inputmode="decimal" min="0" step="any"></label>
-    </div>
-    <div class="dbtns">
-      <button value="archive" class="danger" id="darch" formnovalidate>Archive</button><span></span>
-      <button value="cancel" class="ghost" formnovalidate>Cancel</button>
-      <button value="save" class="primary">Save</button>
-    </div>
-  </form>
-</dialog>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
 
 <script>
 // ---------- storage ----------
-const LS = 'habits.state.v1', LC = 'habits.cfg.v1';
+const LS = 'habits.state.v2', LC = 'habits.cfg.v1';
 const load = (k, f) => { try { return JSON.parse(localStorage.getItem(k)) ?? f; } catch { return f; } };
 const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-let state = load(LS, { habits: {}, entries: {}, dirty: { h: [], e: [] }, lastSync: 0 });
+// Used until the first sync; after that the Actions tab of the sheet is the source of truth.
+const DEFAULT_ACTIONS = [
+  { id: 'jogging', name: 'Jogging', input: 'number', unit: 'steps', required: true, order: 1, hidden: false },
+  { id: 'running', name: 'Running', input: 'number', unit: 'minutes', required: true, order: 2, hidden: false },
+  { id: 'journal', name: 'Journal', input: 'text', unit: '', required: false, order: 3, hidden: false }
+];
+let state = load(LS, { actions: DEFAULT_ACTIONS, records: {}, dirty: [], lastSync: 0 });
 let cfg = load(LC, { url: '', key: '' });
 const save = () => store(LS, state);
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 
-// ---------- dates ----------
+// ---------- helpers ----------
 const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const today = () => iso(new Date());
 const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
 const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
 const fmtLong = s => parse(s).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 const fmtShort = s => parse(s).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
-const fmtNum = n => Number.isInteger(n) ? n : +n.toFixed(2);
+const fmtNum = n => Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function ago(ts) {
   const s = (Date.now() - ts) / 1000;
@@ -129,86 +122,76 @@ function ago(ts) {
 }
 
 // ---------- model ----------
-const active = () => Object.values(state.habits).filter(h => !h.archived).sort((a, b) => a.order - b.order);
-const val = (d, id) => { const e = state.entries[d + '|' + id]; return e ? Number(e.v) || 0 : 0; };
-const isDone = (h, v) => v > 0 && (h.type === 'check' || !h.target || v >= h.target);
-const markDirty = (kind, k) => { if (!state.dirty[kind].includes(k)) state.dirty[kind].push(k); };
+const actions = () => state.actions.filter(a => !a.hidden).sort((a, b) => a.order - b.order);
+const actionById = id => state.actions.find(a => a.id === id);
+const rec = (d, id) => { const r = state.records[d + '|' + id]; return r && r.done ? r : null; };
 
-function streak(h) {
+function describe(a, r) {
+  if (a.input === 'number' && r.n !== null) return `${fmtNum(r.n)} ${a.unit}`.trim();
+  if (a.input === 'text' && r.t) return '“' + r.t.replace(/\s+/g, ' ') + '”';
+  return 'Done';
+}
+function streak(id) {
   let d = today(), n = 0;
-  if (!isDone(h, val(d, h.id))) d = addDays(d, -1);
-  while (isDone(h, val(d, h.id))) { n++; d = addDays(d, -1); }
+  if (!rec(d, id)) d = addDays(d, -1);
+  while (rec(d, id)) { n++; d = addDays(d, -1); }
   return n;
 }
-function bestStreak(h) {
-  const days = Object.values(state.entries).filter(e => e.h === h.id && e.v > 0).map(e => e.d).sort();
-  if (!days.length) return 0;
+function bestStreak(id) {
+  const days = Object.values(state.records).filter(r => r.a === id && r.done).map(r => r.d).sort();
   let best = 0, run = 0;
-  for (let d = days[0], end = today(); d <= end; d = addDays(d, 1)) {
-    run = isDone(h, val(d, h.id)) ? run + 1 : 0;
+  if (days.length) for (let d = days[0], end = today(); d <= end; d = addDays(d, 1)) {
+    run = rec(d, id) ? run + 1 : 0;
     best = Math.max(best, run);
   }
   return best;
 }
-function setEntry(d, id, v) {
-  const k = d + '|' + id;
-  state.entries[k] = { d, h: id, v: Math.max(0, v), u: Date.now() };
-  markDirty('e', k);
-  save(); render(); scheduleSync();
+function record(d, a, n, t, done) {
+  const k = d + '|' + a.id;
+  state.records[k] = { d, a: a.id, n, t, done, u: Date.now() };
+  if (!state.dirty.includes(k)) state.dirty.push(k);
+  save(); scheduleSync();
 }
-function putHabit(h) {
-  h.u = Date.now();
-  state.habits[h.id] = h;
-  markDirty('h', h.id);
-}
-function normHabit(h) {
+function normAction(a) {
   return {
-    id: String(h.id), name: String(h.name || ''), type: h.type === 'amount' ? 'amount' : 'check',
-    unit: String(h.unit || ''), target: Number(h.target) || 0, step: Number(h.step) || 1,
-    order: Number(h.order) || 0, archived: h.archived === true || String(h.archived).toLowerCase() === 'true',
-    u: Number(h.u) || 0
+    id: String(a.id), name: String(a.name || ''),
+    input: ['number', 'text', 'check'].includes(a.input) ? a.input : 'check',
+    unit: String(a.unit || ''), required: !!a.required, order: Number(a.order) || 0, hidden: !!a.hidden
   };
 }
 // Newer timestamp wins. Used for server replies and for imported backups.
-function merge(data, markAsDirty) {
-  const hs = Array.isArray(data.habits) ? data.habits : Object.values(data.habits || {});
-  const es = Array.isArray(data.entries) ? data.entries : Object.values(data.entries || {});
-  for (const raw of hs) {
-    if (!raw || !raw.id) continue;
-    const h = normHabit(raw), l = state.habits[h.id];
-    if (!l || h.u > l.u) { state.habits[h.id] = h; if (markAsDirty) markDirty('h', h.id); }
-  }
-  for (const e of es) {
-    if (!e || !e.d || !e.h) continue;
-    const k = e.d + '|' + e.h, l = state.entries[k], u = Number(e.u) || 0;
-    if (!l || u > l.u) { state.entries[k] = { d: String(e.d), h: String(e.h), v: Number(e.v) || 0, u }; if (markAsDirty) markDirty('e', k); }
+function mergeRecords(list, markDirty) {
+  for (const r of list || []) {
+    if (!r || !r.d || !r.a) continue;
+    const k = r.d + '|' + r.a, l = state.records[k], u = Number(r.u) || 0;
+    if (l && u <= l.u) continue;
+    state.records[k] = { d: String(r.d), a: String(r.a), n: r.n === null || r.n === '' || r.n === undefined ? null : Number(r.n), t: String(r.t || ''), done: !!r.done, u };
+    if (markDirty && !state.dirty.includes(k)) state.dirty.push(k);
   }
 }
 
 // ---------- sync with Google Sheets ----------
 let syncing = false, syncErr = '', timer;
-const pending = () => state.dirty.h.length + state.dirty.e.length;
 const scheduleSync = () => { clearTimeout(timer); timer = setTimeout(sync, 1500); };
 
 async function sync() {
   if (!cfg.url || !cfg.key || syncing) return;
   if (!navigator.onLine) { syncErr = 'Offline, changes are saved on this phone'; paintSync(); return; }
   syncing = true; syncErr = ''; paintSync();
-  const sentH = state.dirty.h.map(id => state.habits[id]).filter(Boolean);
-  const sentE = state.dirty.e.map(k => state.entries[k]).filter(Boolean)
-    .map(e => ({ ...e, n: state.habits[e.h] ? state.habits[e.h].name : '' }));
+  const sent = state.dirty.map(k => state.records[k]).filter(Boolean)
+    .map(r => ({ ...r, name: actionById(r.a) ? actionById(r.a).name : '' }));
   try {
-    const r = await fetch(cfg.url, {
+    const res = await fetch(cfg.url, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // plain text avoids a CORS preflight
-      body: JSON.stringify({ key: cfg.key, habits: sentH, entries: sentE })
+      body: JSON.stringify({ key: cfg.key, records: sent })
     });
-    const data = await r.json();
+    const data = await res.json();
     if (data.error) throw new Error(data.error);
     // Only clear what was sent and not edited again while the request was in flight.
-    state.dirty.h = state.dirty.h.filter(id => !sentH.some(h => h.id === id && state.habits[id] && h.u === state.habits[id].u));
-    state.dirty.e = state.dirty.e.filter(k => !sentE.some(e => e.d + '|' + e.h === k && state.entries[k] && e.u === state.entries[k].u));
-    merge(data, false);
+    state.dirty = state.dirty.filter(k => !sent.some(r => r.d + '|' + r.a === k && state.records[k] && r.u === state.records[k].u));
+    if (Array.isArray(data.actions)) state.actions = data.actions.map(normAction);
+    mergeRecords(data.records, false);
     state.lastSync = Date.now();
     save();
   } catch (err) {
@@ -217,14 +200,16 @@ async function sync() {
       : 'Couldn’t reach Google Sheets, will retry';
   }
   syncing = false;
-  if (tab === 'settings') paintSync(); else render();
+  // Don't redraw under the user's fingers while they are typing a value.
+  if (tab === 'settings' || openId) paintSync(); else render();
 }
 
 function syncText() {
+  const waiting = state.dirty.length;
   if (!cfg.url || !cfg.key) return ['Sync not set up yet, see Settings', true];
   if (syncing) return ['Syncing…', false];
-  if (syncErr) return [syncErr + (pending() ? ` (${pending()} waiting)` : ''), true];
-  if (pending()) return [`${pending()} change(s) waiting to sync`, false];
+  if (syncErr) return [syncErr + (waiting ? ` (${waiting} waiting)` : ''), true];
+  if (waiting) return [`${waiting} change(s) waiting to sync`, false];
   return [state.lastSync ? 'Synced to Google Sheets ' + ago(state.lastSync) : 'Not synced yet', false];
 }
 function paintSync() {
@@ -236,90 +221,103 @@ function paintSync() {
 }
 
 // ---------- views ----------
-let tab = 'today', day = today(), openedOn = today();
+let tab = 'today', day = today(), openedOn = today(), openId = null;
+const drafts = {}; // unsaved input per action, survives redraws
 const app = document.getElementById('app');
 
+function editor(a, r) {
+  const saved = a.input === 'number' ? (r && r.n !== null ? String(r.n) : '') : (r ? r.t : '');
+  const v = drafts[a.id] ?? saved;
+  let field = '';
+  if (a.input === 'number') {
+    field = `<div class="field"><input id="in" type="text" inputmode="decimal" autocomplete="off"
+      placeholder="${a.required ? 'Required' : 'Optional'}" value="${esc(v)}"><span>${esc(a.unit)}</span></div>`;
+  } else if (a.input === 'text') {
+    field = `<textarea id="in" placeholder="${a.required ? 'Write something' : 'Write something (optional)'}">${esc(v)}</textarea>`;
+  }
+  return `<div class="body">${field}<p class="err" id="err"></p>
+    <div class="row">
+      ${r ? `<button class="danger" data-act="remove" data-id="${a.id}">Remove</button>` : ''}
+      <span class="grow"></span>
+      <button class="ghost" data-act="close">Cancel</button>
+      <button class="confirm" data-act="confirm" data-id="${a.id}" aria-label="Confirm">✓</button>
+    </div></div>`;
+}
+
 function viewToday() {
-  const hs = active();
-  const t = today();
+  const as = actions(), t = today();
   const label = day === t ? 'Today' : day === addDays(t, -1) ? 'Yesterday' : fmtShort(day);
   let h = `<header class="day">
     <button class="icon" data-act="prev" aria-label="Previous day">‹</button>
     <div><h1>${label}</h1><p class="sub">${fmtLong(day)}</p></div>
     <button class="icon" data-act="next" aria-label="Next day" ${day >= t ? 'disabled' : ''}>›</button></header>`;
-  if (!hs.length) {
-    return h + `<div class="empty"><p>No habits yet.</p><button class="primary" data-act="add">Add your first habit</button></div>`;
-  }
-  const done = hs.filter(x => isDone(x, val(day, x.id))).length;
-  h += `<p class="summary">${done} of ${hs.length} done</p>`;
-  for (const x of hs) {
-    const v = val(day, x.id), ok = isDone(x, v), s = streak(x);
-    const fire = s ? `🔥 ${s}` : '';
-    if (x.type === 'check') {
-      h += `<button class="habit ${ok ? 'done' : ''}" data-act="toggle" data-id="${x.id}" aria-pressed="${ok}">
-        <span class="tick">${ok ? '✓' : ''}</span><span class="name">${esc(x.name)}</span><span class="streak">${fire}</span></button>`;
-    } else {
-      const pct = x.target ? Math.min(100, v / x.target * 100) : (v > 0 ? 100 : 0);
-      h += `<div class="habit amount ${ok ? 'done' : ''}">
-        <div class="row"><span class="name">${esc(x.name)}</span><span class="streak">${fire}</span></div>
-        <div class="row">
-          <button class="step" data-act="dec" data-id="${x.id}" aria-label="Less">−</button>
-          <button class="qty" data-act="set" data-id="${x.id}">${fmtNum(v)}${x.target ? ` / ${fmtNum(x.target)}` : ''} <small>${esc(x.unit)}</small></button>
-          <button class="step" data-act="inc" data-id="${x.id}" aria-label="More">+</button>
-        </div>
-        <div class="bar"><i style="width:${pct}%"></i></div></div>`;
-    }
+  if (!as.length) return h + `<div class="empty"><p>No actions. Add some in the <b>Actions</b> tab of your Google Sheet.</p></div>`;
+  h += `<p class="summary">${as.filter(a => rec(day, a.id)).length} of ${as.length} done</p>`;
+  for (const a of as) {
+    const r = rec(day, a.id), open = openId === a.id, s = streak(a.id);
+    const status = r ? describe(a, r)
+      : a.input === 'number' ? `Tap to add ${a.unit || 'a number'}${a.required ? '' : ' (optional)'}`
+      : a.input === 'text' ? `Tap to write${a.required ? '' : ' (optional)'}` : 'Tap to mark as done';
+    h += `<div class="act ${r ? 'done' : ''} ${open ? 'open' : ''}">
+      <button class="head" data-act="open" data-id="${a.id}" aria-expanded="${open}">
+        <span class="tick">${r ? '✓' : ''}</span>
+        <span class="name">${esc(a.name)}<small>${esc(status)}</small></span>
+        <span class="chev">${s ? '🔥 ' + s : open ? '' : '›'}</span>
+      </button>${open ? editor(a, r) : ''}</div>`;
   }
   return h + `<p id="syncline" class="syncline"></p>`;
 }
 
 function viewHistory() {
-  const hs = active();
-  if (!hs.length) return `<h1 style="margin-top:16px">History</h1><div class="empty"><p>Add a habit to see your history.</p></div>`;
-  const t = today();
+  const as = actions(), t = today();
   const weekday = (parse(t).getDay() + 6) % 7; // Monday = 0
   const start = addDays(t, -(weekday + 16 * 7));
   let h = `<h1 style="margin-top:16px">History</h1><p class="sub">Last 17 weeks · each column is a week, Monday on top</p><div style="height:14px"></div>`;
-  for (const x of hs) {
-    let cells = '', last30 = 0;
+  for (const a of as) {
+    let cells = '', days30 = 0, sum7 = 0, sum30 = 0;
     for (let i = 0; i < 17 * 7; i++) {
       const d = addDays(start, i);
-      if (d > t) { cells += '<i class="future"></i>'; continue; }
-      const v = val(d, x.id);
-      cells += `<i class="${isDone(x, v) ? 'full' : v > 0 ? 'half' : ''}" title="${d}: ${fmtNum(v)}"></i>`;
+      cells += d > t ? '<i class="future"></i>' : `<i class="${rec(d, a.id) ? 'full' : ''}"></i>`;
     }
-    for (let i = 0; i < 30; i++) if (isDone(x, val(addDays(t, -i), x.id))) last30++;
-    h += `<div class="card"><strong>${esc(x.name)}</strong>
-      <div class="stats"><span><b>${streak(x)}</b> current</span><span><b>${bestStreak(x)}</b> best</span><span><b>${Math.round(last30 / 30 * 100)}%</b> last 30 days</span></div>
-      <div class="grid">${cells}</div></div>`;
+    for (let i = 0; i < 30; i++) {
+      const r = rec(addDays(t, -i), a.id);
+      if (!r) continue;
+      days30++;
+      if (r.n !== null) { sum30 += r.n; if (i < 7) sum7 += r.n; }
+    }
+    let extra = '';
+    if (a.input === 'number') {
+      extra = `<span><b>${fmtNum(sum7)}</b> ${esc(a.unit)} last 7 days</span><span><b>${fmtNum(sum30)}</b> ${esc(a.unit)} last 30 days</span>`;
+    }
+    let notes = '';
+    if (a.input === 'text') {
+      const recent = Object.values(state.records).filter(r => r.a === a.id && r.done && r.t).sort((x, y) => y.d.localeCompare(x.d)).slice(0, 5);
+      if (recent.length) notes = `<ul class="notes">${recent.map(r => `<li><time>${fmtShort(r.d)}</time>${esc(r.t)}</li>`).join('')}</ul>`;
+    }
+    h += `<div class="card"><strong>${esc(a.name)}</strong>
+      <div class="stats"><span><b>${streak(a.id)}</b> day streak</span><span><b>${bestStreak(a.id)}</b> best</span><span><b>${days30}</b>/30 days</span>${extra}</div>
+      <div class="grid">${cells}</div>${notes}</div>`;
   }
   return h;
 }
 
 function viewSettings() {
-  const hs = active();
-  const archived = Object.values(state.habits).filter(x => x.archived);
-  const meta = x => x.type === 'check' ? 'Yes / no' : `Amount${x.unit ? ' · ' + esc(x.unit) : ''}${x.target ? ' · target ' + fmtNum(x.target) : ''}`;
-  let h = `<h1 style="margin-top:16px">Settings</h1><h2>Habits</h2><div class="card">`;
-  h += hs.map((x, i) => `<div class="hrow"><div class="name">${esc(x.name)}<div class="meta">${meta(x)}</div></div>
-      <button data-act="up" data-id="${x.id}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
-      <button data-act="down" data-id="${x.id}" ${i === hs.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button>
-      <button data-act="edit" data-id="${x.id}">Edit</button></div>`).join('') || '<p class="note">No habits yet.</p>';
-  h += `</div><button class="primary" data-act="add">+ Add habit</button>`;
-  if (archived.length) {
-    h += `<h2>Archived</h2><div class="card">` + archived.map(x => `<div class="hrow"><div class="name">${esc(x.name)}</div>
-      <button data-act="restore" data-id="${x.id}">Restore</button></div>`).join('') + `</div>`;
-  }
-  h += `<h2>Google Sheets sync</h2><div class="card">
-    <label>Web app URL<input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(cfg.url)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
-    <label>Secret key<input id="cfgKey" type="password" placeholder="Same as SECRET in the script" value="${esc(cfg.key)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
-    <div class="btns"><button class="primary" data-act="savecfg">Save & sync now</button></div>
-    <p id="syncline" class="syncline" style="text-align:left"></p>
-    <p class="note">On a new phone, enter the same URL and key: everything comes back from the sheet.</p></div>
+  const kind = a => a.input === 'number' ? `Number${a.unit ? ' · ' + esc(a.unit) : ''}` : a.input === 'text' ? 'Text' : 'Tick only';
+  return `<h1 style="margin-top:16px">Settings</h1>
+    <h2>Actions</h2><div class="card"><ul class="alist">${
+      state.actions.slice().sort((a, b) => a.order - b.order).map(a => `<li>${esc(a.name)}${a.hidden ? ' (hidden)' : ''}
+        <small>${kind(a)} · ${a.required ? 'required' : 'optional'}</small></li>`).join('')}</ul>
+      <p class="note">To add, rename or hide actions, edit the <b>Actions</b> tab in your Google Sheet, then tap Reload.</p>
+      <div class="btns" style="margin-top:10px"><button class="ghost" data-act="reload">Reload from sheet</button></div></div>
+    <h2>Google Sheets sync</h2><div class="card">
+      <label>Web app URL<input id="cfgUrl" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(cfg.url)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <label>Secret key<input id="cfgKey" type="password" placeholder="Same as SECRET in the script" value="${esc(cfg.key)}" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <div class="btns"><button class="primary" data-act="savecfg">Save & sync now</button></div>
+      <p id="syncline" class="syncline" style="text-align:left"></p>
+      <p class="note">On a new phone, enter the same URL and key: everything comes back from the sheet.</p></div>
     <h2>Backup file</h2><div class="card">
-    <div class="btns"><button class="ghost" data-act="export">Export backup</button><button class="ghost" data-act="import">Import backup</button></div>
-    <p class="note">An extra safety net. Importing merges with what's here; the newest edit of each day wins.</p></div>`;
-  return h;
+      <div class="btns"><button class="ghost" data-act="export">Export backup</button><button class="ghost" data-act="import">Import backup</button></div>
+      <p class="note">An extra safety net. Importing merges with what's here; the newest edit of each day wins.</p></div>`;
 }
 
 function render() {
@@ -327,105 +325,92 @@ function render() {
   document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   paintSync();
 }
-
-// ---------- habit dialog ----------
-const dlg = document.getElementById('dlg'), form = document.getElementById('hform');
-let editing = null;
-function openHabit(id) {
-  editing = id ? state.habits[id] : null;
-  document.getElementById('dtitle').textContent = editing ? 'Edit habit' : 'New habit';
-  document.getElementById('darch').hidden = !editing;
-  form.name.value = editing ? editing.name : '';
-  form.type.value = editing ? editing.type : 'check';
-  form.unit.value = editing ? editing.unit : '';
-  form.target.value = editing && editing.target ? editing.target : '';
-  form.step.value = editing ? editing.step : 1;
-  document.getElementById('amt').hidden = form.type.value !== 'amount';
-  dlg.returnValue = '';
-  dlg.showModal();
-}
-form.type.addEventListener('change', () => { document.getElementById('amt').hidden = form.type.value !== 'amount'; });
-dlg.addEventListener('close', () => {
-  const how = dlg.returnValue;
-  if (how === 'save') {
-    const name = form.name.value.trim();
-    if (!name) return;
-    const base = editing || {
-      id: 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      order: Math.max(0, ...Object.values(state.habits).map(x => x.order)) + 1, archived: false
-    };
-    putHabit({ ...base, name, type: form.type.value, unit: form.unit.value.trim(),
-      target: Number(form.target.value) || 0, step: Number(form.step.value) || 1 });
-  } else if (how === 'archive' && editing && confirm(`Archive “${editing.name}”? Its history is kept and you can restore it.`)) {
-    putHabit({ ...editing, archived: true });
-  } else return;
-  save(); render(); scheduleSync();
-});
+const showErr = msg => { const el = document.getElementById('err'); if (el) el.textContent = msg; };
 
 // ---------- actions ----------
+function confirmAction(a) {
+  const el = document.getElementById('in');
+  let n = null, t = '';
+  if (a.input === 'number') {
+    const raw = el.value.trim().replace(/\s/g, '').replace(',', '.');
+    if (raw !== '') {
+      n = Number(raw);
+      if (!isFinite(n) || n < 0) return showErr('Please enter a valid number');
+    }
+    if (a.required && !(n > 0)) return showErr(`Enter ${a.unit || 'a number'} to confirm`);
+  } else if (a.input === 'text') {
+    t = el.value.trim();
+    if (a.required && !t) return showErr('Write something to confirm');
+  }
+  record(day, a, n, t, true);
+  delete drafts[a.id];
+  openId = null;
+  render();
+}
+
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
   if (!b) return;
-  const id = b.dataset.id, h = id && state.habits[id];
+  const id = b.dataset.id, a = id && actionById(id);
   switch (b.dataset.act) {
-    case 'tab': tab = b.dataset.tab; if (tab === 'today') day = today(); render(); window.scrollTo(0, 0); break;
-    case 'prev': day = addDays(day, -1); render(); break;
-    case 'next': if (day < today()) { day = addDays(day, 1); render(); } break;
-    case 'toggle': setEntry(day, id, val(day, id) > 0 ? 0 : 1); break;
-    case 'inc': setEntry(day, id, val(day, id) + h.step); break;
-    case 'dec': setEntry(day, id, val(day, id) - h.step); break;
-    case 'set': {
-      const v = prompt(`${h.name}${h.unit ? ' (' + h.unit + ')' : ''}`, fmtNum(val(day, id)));
-      if (v !== null && v.trim() !== '' && !isNaN(Number(v.replace(',', '.')))) setEntry(day, id, Number(v.replace(',', '.')));
+    case 'tab': tab = b.dataset.tab; openId = null; if (tab === 'today') day = today(); render(); window.scrollTo(0, 0); break;
+    case 'prev': day = addDays(day, -1); openId = null; render(); break;
+    case 'next': if (day < today()) { day = addDays(day, 1); openId = null; render(); } break;
+    case 'open': {
+      openId = openId === id ? null : id;
+      render();
+      const el = document.getElementById('in');
+      if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
       break;
     }
-    case 'add': openHabit(null); break;
-    case 'edit': openHabit(id); break;
-    case 'restore': putHabit({ ...h, archived: false }); save(); render(); scheduleSync(); break;
-    case 'up': case 'down': {
-      const list = active(), i = list.findIndex(x => x.id === id), j = b.dataset.act === 'up' ? i - 1 : i + 1;
-      if (j < 0 || j >= list.length) break;
-      list.forEach((x, n) => { if (x.order !== n) putHabit({ ...x, order: n }); });
-      const a = state.habits[list[i].id], c = state.habits[list[j].id];
-      putHabit({ ...a, order: j }); putHabit({ ...c, order: i });
-      save(); render(); scheduleSync(); break;
-    }
+    case 'close': delete drafts[openId]; openId = null; render(); break;
+    case 'confirm': confirmAction(a); break;
+    case 'remove':
+      if (confirm(`Remove ${a.name} for ${fmtShort(day)}?`)) { record(day, a, null, '', false); delete drafts[id]; openId = null; render(); }
+      break;
+    case 'reload': sync(); break;
     case 'savecfg':
-      cfg = { url: document.getElementById('cfgUrl').value.trim(), key: document.getElementById('cfgKey').value };
+      cfg = { url: document.getElementById('cfgUrl').value.trim(), key: document.getElementById('cfgKey').value.trim() };
       store(LC, cfg);
       // First connection: send everything so the sheet gets a full copy.
-      Object.keys(state.habits).forEach(k => markDirty('h', k));
-      Object.keys(state.entries).forEach(k => markDirty('e', k));
+      Object.keys(state.records).forEach(k => { if (!state.dirty.includes(k)) state.dirty.push(k); });
       save(); sync(); break;
     case 'export': exportBackup(); break;
     case 'import': document.getElementById('importFile').click(); break;
   }
 });
+document.addEventListener('input', e => { if (e.target.id === 'in' && openId) drafts[openId] = e.target.value; });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'in' && e.target.tagName === 'INPUT') { e.preventDefault(); confirmAction(actionById(openId)); }
+});
 
 function exportBackup() {
-  const json = JSON.stringify({ habits: Object.values(state.habits), entries: Object.values(state.entries) });
+  const json = JSON.stringify({ actions: state.actions, records: Object.values(state.records) });
   const name = `habits-backup-${today()}.json`;
   const file = new File([json], name, { type: 'application/json' });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     navigator.share({ files: [file] }).catch(() => {});
   } else {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(file); a.download = name; a.click();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(file); link.download = name; link.click();
   }
 }
 document.getElementById('importFile').addEventListener('change', async e => {
   const f = e.target.files[0];
   e.target.value = '';
   if (!f) return;
-  try { merge(JSON.parse(await f.text()), true); save(); render(); scheduleSync(); alert('Backup imported.'); }
-  catch { alert('That file is not a habits backup.'); }
+  try {
+    const data = JSON.parse(await f.text());
+    if (!Array.isArray(data.records)) throw new Error();
+    mergeRecords(data.records, true); save(); render(); scheduleSync(); alert('Backup imported.');
+  } catch { alert('That file is not a backup from this app.'); }
 });
 
 // ---------- start ----------
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
-  if (openedOn !== today()) { day = openedOn = today(); } // a new day started while the app was open
-  if (tab !== 'settings') render();
+  if (openedOn !== today()) { day = openedOn = today(); openId = null; } // a new day started while the app was open
+  if (tab !== 'settings' && !openId) render();
   sync();
 });
 window.addEventListener('online', sync);
