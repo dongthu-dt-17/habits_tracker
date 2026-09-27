@@ -54,6 +54,10 @@ header.day{display:flex;align-items:center;justify-content:space-between;gap:12p
 .err:empty{display:none}
 .row{display:flex;align-items:center;gap:10px;margin-top:12px}
 .row .grow{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:9px 14px;font-size:15px}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.chip.on::before{content:'✓ '}
 .confirm{width:56px;height:56px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);font-size:26px;font-weight:700}
 
 .empty{text-align:center;padding:40px 0;color:var(--muted)}
@@ -124,11 +128,13 @@ function ago(ts) {
 // ---------- model ----------
 const actions = () => state.actions.filter(a => !a.hidden).sort((a, b) => a.order - b.order);
 const actionById = id => state.actions.find(a => a.id === id);
+const splitOpts = s => s ? s.split(',').map(x => x.trim()).filter(Boolean) : [];
 const rec = (d, id) => { const r = state.records[d + '|' + id]; return r && r.done ? r : null; };
 
 function describe(a, r) {
   if (a.input === 'number' && r.n !== null) return `${fmtNum(r.n)} ${a.unit}`.trim();
   if (a.input === 'text' && r.t) return '“' + r.t.replace(/\s+/g, ' ') + '”';
+  if (a.input === 'multi' && r.t) return r.t;
   return 'Done';
 }
 function streak(id) {
@@ -155,8 +161,9 @@ function record(d, a, n, t, done) {
 function normAction(a) {
   return {
     id: String(a.id), name: String(a.name || ''),
-    input: ['number', 'text', 'check'].includes(a.input) ? a.input : 'check',
-    unit: String(a.unit || ''), required: !!a.required, order: Number(a.order) || 0, hidden: !!a.hidden
+    input: ['number', 'text', 'check', 'multi'].includes(a.input) ? a.input : 'check',
+    unit: String(a.unit || ''), required: !!a.required, order: Number(a.order) || 0, hidden: !!a.hidden,
+    options: Array.isArray(a.options) ? a.options.map(String) : []
   };
 }
 // Newer timestamp wins. Used for server replies and for imported backups.
@@ -188,6 +195,7 @@ async function sync() {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
+    if (!Array.isArray(data.records)) throw new Error('outdated');
     // Only clear what was sent and not edited again while the request was in flight.
     state.dirty = state.dirty.filter(k => !sent.some(r => r.d + '|' + r.a === k && state.records[k] && r.u === state.records[k].u));
     if (Array.isArray(data.actions)) state.actions = data.actions.map(normAction);
@@ -195,8 +203,8 @@ async function sync() {
     state.lastSync = Date.now();
     save();
   } catch (err) {
-    syncErr = err.message === 'unauthorized'
-      ? 'Secret key doesn’t match the one in the script'
+    syncErr = err.message === 'unauthorized' ? 'Secret key doesn’t match the one in the script'
+      : err.message === 'outdated' ? 'The script in Google Sheets is an old version, deploy the new one'
       : 'Couldn’t reach Google Sheets, will retry';
   }
   syncing = false;
@@ -225,6 +233,12 @@ let tab = 'today', day = today(), openedOn = today(), openId = null;
 const drafts = {}; // unsaved input per action, survives redraws
 const app = document.getElementById('app');
 
+// Current picks for a multi action: the unsaved draft, else what was saved for the day.
+function selected(a) {
+  if (Array.isArray(drafts[a.id])) return drafts[a.id];
+  const r = rec(day, a.id);
+  return splitOpts(r ? r.t : '');
+}
 function editor(a, r) {
   const saved = a.input === 'number' ? (r && r.n !== null ? String(r.n) : '') : (r ? r.t : '');
   const v = drafts[a.id] ?? saved;
@@ -232,6 +246,11 @@ function editor(a, r) {
   if (a.input === 'number') {
     field = `<div class="field"><input id="in" type="text" inputmode="decimal" autocomplete="off"
       placeholder="${a.required ? 'Required' : 'Optional'}" value="${esc(v)}"><span>${esc(a.unit)}</span></div>`;
+  } else if (a.input === 'multi') {
+    const sel = selected(a);
+    field = a.options.length
+      ? `<div class="chips">${a.options.map((o, i) => `<button class="chip ${sel.includes(o) ? 'on' : ''}" data-act="pick" data-i="${i}" aria-pressed="${sel.includes(o)}">${esc(o)}</button>`).join('')}</div>`
+      : `<p class="note">No choices yet. Fill in the <b>options</b> column of the Actions tab, e.g. <i>Park, Gym, Treadmill</i>.</p>`;
   } else if (a.input === 'text') {
     field = `<textarea id="in" placeholder="${a.required ? 'Write something' : 'Write something (optional)'}">${esc(v)}</textarea>`;
   }
@@ -257,7 +276,8 @@ function viewToday() {
     const r = rec(day, a.id), open = openId === a.id, s = streak(a.id);
     const status = r ? describe(a, r)
       : a.input === 'number' ? `Tap to add ${a.unit || 'a number'}${a.required ? '' : ' (optional)'}`
-      : a.input === 'text' ? `Tap to write${a.required ? '' : ' (optional)'}` : 'Tap to mark as done';
+      : a.input === 'text' ? `Tap to write${a.required ? '' : ' (optional)'}`
+      : a.input === 'multi' ? `Tap to choose${a.required ? '' : ' (optional)'}` : 'Tap to mark as done';
     h += `<div class="act ${r ? 'done' : ''} ${open ? 'open' : ''}">
       <button class="head" data-act="open" data-id="${a.id}" aria-expanded="${open}">
         <span class="tick">${r ? '✓' : ''}</span>
@@ -289,6 +309,15 @@ function viewHistory() {
     if (a.input === 'number') {
       extra = `<span><b>${fmtNum(sum7)}</b> ${esc(a.unit)} last 7 days</span><span><b>${fmtNum(sum30)}</b> ${esc(a.unit)} last 30 days</span>`;
     }
+    if (a.input === 'multi') {
+      const count = {};
+      for (let i = 0; i < 30; i++) {
+        const r = rec(addDays(t, -i), a.id);
+        if (r) splitOpts(r.t).forEach(o => { count[o] = (count[o] || 0) + 1; });
+      }
+      extra = Object.keys(count).sort((x, y) => count[y] - count[x])
+        .map(o => `<span><b>${count[o]}</b>× ${esc(o)}</span>`).join('');
+    }
     let notes = '';
     if (a.input === 'text') {
       const recent = Object.values(state.records).filter(r => r.a === a.id && r.done && r.t).sort((x, y) => y.d.localeCompare(x.d)).slice(0, 5);
@@ -302,7 +331,8 @@ function viewHistory() {
 }
 
 function viewSettings() {
-  const kind = a => a.input === 'number' ? `Number${a.unit ? ' · ' + esc(a.unit) : ''}` : a.input === 'text' ? 'Text' : 'Tick only';
+  const kind = a => a.input === 'number' ? `Number${a.unit ? ' · ' + esc(a.unit) : ''}` : a.input === 'text' ? 'Text'
+    : a.input === 'multi' ? `Multiple choice · ${esc(a.options.join(', ') || 'no options yet')}` : 'Tick only';
   return `<h1 style="margin-top:16px">Settings</h1>
     <h2>Actions</h2><div class="card"><ul class="alist">${
       state.actions.slice().sort((a, b) => a.order - b.order).map(a => `<li>${esc(a.name)}${a.hidden ? ' (hidden)' : ''}
@@ -338,6 +368,10 @@ function confirmAction(a) {
       if (!isFinite(n) || n < 0) return showErr('Please enter a valid number');
     }
     if (a.required && !(n > 0)) return showErr(`Enter ${a.unit || 'a number'} to confirm`);
+  } else if (a.input === 'multi') {
+    const sel = selected(a);
+    if (a.required && !sel.length) return showErr('Pick at least one to confirm');
+    t = sel.join(', ');
   } else if (a.input === 'text') {
     t = el.value.trim();
     if (a.required && !t) return showErr('Write something to confirm');
@@ -362,6 +396,13 @@ document.addEventListener('click', e => {
       const el = document.getElementById('in');
       if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
       break;
+    }
+    case 'pick': {
+      const a2 = actionById(openId), opt = a2.options[Number(b.dataset.i)];
+      const cur = selected(a2);
+      const next = cur.includes(opt) ? cur.filter(o => o !== opt) : cur.concat(opt);
+      drafts[openId] = a2.options.filter(o => next.includes(o)); // keep the sheet's order
+      render(); break;
     }
     case 'close': delete drafts[openId]; openId = null; render(); break;
     case 'confirm': confirmAction(a); break;
